@@ -219,7 +219,7 @@ async def add_transaction(
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_user)
 ):
-    # 1️⃣ Yeni işlem verisi hazırla
+    # 1⃣ Yeni işlem verisi hazırla
     transaction_data = {
         "user_id": current_user.username,
         "activity": tx.activity,
@@ -227,14 +227,14 @@ async def add_transaction(
         "location": tx.location
     }
 
-    # 2️⃣ Smart contract doğrulama
+    # 2️ Smart contract doğrulama
     smart_contract = SmartContract()
     smart_contract.validate_transaction(transaction_data, current_user, db)
 
-    # 3️⃣ Veritabanındaki son bloğu al (sıfır değil en güncel olmalı!)
+    # 3️ Veritabanındaki son bloğu al (sıfır değil en güncel olmalı!)
     last_block = db.query(BlockDB).order_by(BlockDB.index.desc()).first()
 
-    # 4️⃣ Yeni blok oluştur
+    # 4️ Yeni blok oluştur
     new_block = Block(
         index=(last_block.index + 1) if last_block else 1,
         timestamp=datetime.utcnow(),
@@ -243,7 +243,7 @@ async def add_transaction(
     )
     new_block.mine_block()  # Nonce hesapla!
 
-    # 5️⃣ Veritabanına kaydet
+    # 5️ Veritabanına kaydet
     db_block = BlockDB(
         index=new_block.index,
         transactions=json.dumps(new_block.transactions),
@@ -264,6 +264,10 @@ async def add_transaction(
     }
 
 from fastapi.responses import JSONResponse
+
+
+
+
 
 @app.get("/validate_chain", tags=["Admin Only"])
 async def validate_chain(db: Session = Depends(get_db), current_user: DBUser = Depends(get_current_user)):
